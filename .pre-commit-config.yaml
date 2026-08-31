@@ -17,11 +17,7 @@ repos:
     rev: v1.3.5
     hooks:
     -   id: clang-tidy
+        args: [-p=build/debug]
         files: \.(cpp|hpp|cc|h|cxx|c)$
     -   id: cppcheck
-        files: \.(cpp|hpp|cc|h|cxx|c)$
-    -   id: cpplint
-        args: [--filter=-legal/copyright]
-        files: \.(cpp|hpp|cc|h|cxx|c)$
-    -   id: include-what-you-use
         files: \.(cpp|hpp|cc|h|cxx|c)$

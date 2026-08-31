@@ -1,1 +1,6 @@
-auto main() -> int { return 0; }
+#include <re-vim/terminal.hpp>
+
+auto main() -> int {
+  Terminal terminal;
+  return 0;
+}

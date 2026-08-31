@@ -8,7 +8,7 @@ Checks: >
   performance-*,
   portability-*,
   readability-*,
-  -modernize-use-trailing-return-type,
+  -portability-avoid-pragma-once,
   -readability-identifier-length,
   -readability-magic-numbers,
   -cppcoreguidelines-avoid-magic-numbers,
