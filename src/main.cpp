@@ -1,23 +1,28 @@
 #include <argparse/argparse.hpp>
-#include <exception>
 #include <iostream>
 #include <ncurses.h>
 #include <re-vim/commands.hpp>
 #include <re-vim/terminal.hpp>
+#include <stdexcept>
 #include <string>
 
 auto main(int argc, char *argv[]) -> int {
-  argparse::ArgumentParser program("re-vim", "0.1.0");
-
-  program.add_argument("filename")
-      .help("File to open text editor in.")
-      .required();
-
   try {
-    program.parse_args(argc, argv);
+    argparse::ArgumentParser program("re-vim", "0.1.0");
+
+    program.add_argument("filename")
+        .help("File to open text editor in.")
+        .required();
+
+    try {
+      program.parse_args(argc, argv);
+    } catch (const std::runtime_error &e) {
+      std::cerr << e.what() << '\n';
+      std::cerr << program;
+      return 1;
+    }
   } catch (const std::exception &e) {
     std::cerr << e.what() << '\n';
-    std::cerr << program;
     return 1;
   }
 
