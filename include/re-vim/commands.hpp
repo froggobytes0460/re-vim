@@ -54,9 +54,7 @@ struct Command {
   int line1{0};      ///< First line of the range.
   int line2{0};      ///< Last line of the range.
   int addr_count{0}; ///< Number of addresses supplied in the range.
-
-  // Identity
-  int count{0}; ///< Numeric count argument, if any.
+  int count{0};      ///< Numeric count argument, if any (e.g. `:next 3`).
 
   // Modifiers
   bool forceit{false}; ///< Whether the `!` modifier was present.
