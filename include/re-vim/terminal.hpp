@@ -1,7 +1,8 @@
 #pragma once
 
-// @brief RAII on handling `ncurses` termminal window initiliazation and
-// destruction.
+/// @brief  RAII class wrapper on `ncurses` init/destruct. Deletes all copy and
+/// move constructors/functions, as this may cause undefined behaviour if
+/// misused.
 class Terminal {
 public:
   Terminal();

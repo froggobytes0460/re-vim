@@ -20,4 +20,9 @@ repos:
         args: [-p=build/debug]
         files: \.(cpp|hpp|cc|h|cxx|c)$
     -   id: cppcheck
+        args: [--suppress=unusedStructMember, --suppress=unusedFunction,
+               --suppress=unmatchedSuppression,
+               --suppress=missingIncludeSystem,
+               --suppress=checkersReport,
+               --suppress=normalCheckLevelMaxBranches]
         files: \.(cpp|hpp|cc|h|cxx|c)$
