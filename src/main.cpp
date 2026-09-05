@@ -13,6 +13,7 @@ auto main(int argc, char *argv[]) -> int {
     program.add_argument("filename")
         .help("File to open text editor in.")
         .required();
+    program.add_description("TUI text editor, baesd off vim.");
 
     try {
       program.parse_args(argc, argv);
