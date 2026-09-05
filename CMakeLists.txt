@@ -54,4 +54,10 @@ if(NOT CURSES_FOUND)
                       "Install them with:\n    ${_hint}\n" "Then re-run cmake.")
 endif()
 
+include(FetchContent)
+
+FetchContent_Declare(argparse
+                     GIT_REPOSITORY https://github.com/p-ranav/argparse.git)
+FetchContent_MakeAvailable(argparse)
+
 add_subdirectory(src)
