@@ -1,5 +1,5 @@
 set(SOURCES main.cpp terminal.cpp commands/parser.cpp commands/table.cpp
-            commands/call_cmd.cpp)
+            commands/call_cmd.cpp buffer.cpp)
 
 add_executable(re-vim ${SOURCES})
 

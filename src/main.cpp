@@ -1,12 +1,14 @@
 #include <argparse/argparse.hpp>
 #include <iostream>
 #include <ncurses.h>
+#include <re-vim/buffer.hpp>
 #include <re-vim/commands.hpp>
 #include <re-vim/terminal.hpp>
 #include <stdexcept>
 #include <string>
 
 auto main(int argc, char *argv[]) -> int {
+  std::string filename;
   try {
     argparse::ArgumentParser program("re-vim", "0.1.0");
 
@@ -17,6 +19,7 @@ auto main(int argc, char *argv[]) -> int {
 
     try {
       program.parse_args(argc, argv);
+      filename = program.get<std::string>("filename");
     } catch (const std::runtime_error &e) {
       std::cerr << e.what() << '\n';
       std::cerr << program;
@@ -28,6 +31,13 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   Terminal terminal;
+
+  Buffer buffer(filename);
+  buffer.load();
+
+  for (const std::string &line : buffer.getLines()) {
+    printw("%s\n", line.data()); // NOLINT(cppcoreguidelines-pro-type-vararg)
+  }
 
   while (!global_flag::f_should_quit) {
     int ch = getch();
