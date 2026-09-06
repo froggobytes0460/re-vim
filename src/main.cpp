@@ -3,6 +3,7 @@
 #include <ncurses.h>
 #include <re-vim/buffer.hpp>
 #include <re-vim/commands.hpp>
+#include <re-vim/cursor.hpp>
 #include <re-vim/globals.hpp>
 #include <re-vim/terminal.hpp>
 #include <stdexcept>
@@ -32,6 +33,7 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   Terminal terminal;
+  Cursor cursor;
 
   Buffer buffer(filename);
   buffer.load();
@@ -51,6 +53,21 @@ auto main(int argc, char *argv[]) -> int {
       callCmd(cmd);
       continue;
     }
+
+    if (ch == KEY_RIGHT || ch == 'l') {
+      cursor.moveRight(buffer);
+    }
+    if (ch == KEY_LEFT || ch == 'h') {
+      cursor.moveLeft();
+    }
+    if (ch == KEY_UP || ch == 'k') {
+      cursor.moveUp(buffer);
+    }
+    if (ch == KEY_DOWN || ch == 'j') {
+      cursor.moveDown(buffer);
+    }
+    move(cursor.line(), cursor.col());
+    refresh();
   }
   return 0;
 }

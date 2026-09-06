@@ -1,5 +1,11 @@
-set(SOURCES main.cpp terminal.cpp commands/parser.cpp commands/table.cpp
-            commands/call_cmd.cpp buffer.cpp)
+set(SOURCES
+    main.cpp
+    terminal.cpp
+    commands/parser.cpp
+    commands/table.cpp
+    commands/call_cmd.cpp
+    buffer.cpp
+    cursor.cpp)
 
 add_executable(re-vim ${SOURCES})
 
