@@ -14,21 +14,21 @@ void Buffer::load() {
 }
 
 void Buffer::save() {
-  std::string tmp = filename_ + ".tmp";
-  std::ofstream tmp_file(tmp);
+  std::string tmp_name = filename_ + ".tmp";
+  std::ofstream tmp(tmp_name);
 
   for (const std::string &s : lines_) {
-    tmp_file << s << '\n';
+    tmp << s << '\n';
   }
-  tmp_file.close();
+  tmp.close();
 
-  if (tmp_file.fail()) {
-    fs::remove(tmp);
-    throw std::runtime_error("Failed to save file: " + tmp);
+  if (tmp.fail()) {
+    fs::remove(tmp_name);
+    throw std::runtime_error("Failed to save file: " + tmp_name);
   }
 
   if (fs::exists(filename_)) {
     fs::remove(filename_);
   }
-  fs::rename(tmp, filename_);
+  fs::rename(tmp_name, filename_);
 }

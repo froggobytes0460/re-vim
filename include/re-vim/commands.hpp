@@ -5,11 +5,7 @@
 #include <span>
 #include <string>
 
-namespace global_flag {
-/// @brief Flag to control main app loop.
-/// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-inline bool f_should_quit{false};
-} // namespace global_flag
+class Buffer;
 
 /// @brief Character that opens the command-line prompt (`:`).
 constexpr char COMMAND_KEY{':'};

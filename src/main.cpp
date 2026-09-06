@@ -3,6 +3,7 @@
 #include <ncurses.h>
 #include <re-vim/buffer.hpp>
 #include <re-vim/commands.hpp>
+#include <re-vim/globals.hpp>
 #include <re-vim/terminal.hpp>
 #include <stdexcept>
 #include <string>
@@ -34,12 +35,13 @@ auto main(int argc, char *argv[]) -> int {
 
   Buffer buffer(filename);
   buffer.load();
+  global_vars::g_buffer = &buffer;
 
   for (const std::string &line : buffer.getLines()) {
     printw("%s\n", line.data()); // NOLINT(cppcoreguidelines-pro-type-vararg)
   }
 
-  while (!global_flag::f_should_quit) {
+  while (!global_vars::f_should_quit) {
     int ch = getch();
     if (ch == ERR) {
       continue;
