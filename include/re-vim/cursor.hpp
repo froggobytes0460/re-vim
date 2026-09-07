@@ -27,7 +27,7 @@ public:
   /// @param[in] buff Uses buffer to safeguard move ops.
   void moveRight(const Buffer &buff);
 
-  /// @brief Moves cursor left, stays on EOL if reached.
+  /// @brief Moves cursor left, stays on first char if reached.
   void moveLeft();
 
   /// @brief Moves cursor up, stays on first line if reached.
@@ -37,4 +37,12 @@ public:
   /// @brief Moves cursor down, stays on EOF if reached.
   /// @param[in] buff Uses buffer to safeguard move ops.
   void moveDown(const Buffer &buff);
+
+  /// @brief Advance one column after insertion.
+  void moveRightInsert();
+
+  /// @brief Directly sets the column, e.g. to reposition after a line split
+  /// or join. Also updates `desired_col_`.
+  /// @param[in] col Column to set.
+  void setCol(int col);
 };

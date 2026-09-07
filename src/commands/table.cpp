@@ -4,7 +4,7 @@
 #include <re-vim/globals.hpp>
 
 namespace {
-void quitCmd(Command & /*cmd*/) { global_vars::f_should_quit = true; }
+void quitCmd(Command & /*cmd*/) { global_vars::termination_flag = true; }
 
 void writeCmd(Command & /*cmd*/) {
   if (global_vars::g_buffer != nullptr) {
@@ -14,9 +14,8 @@ void writeCmd(Command & /*cmd*/) {
 } // namespace
 
 auto getCommandsArray() -> std::span<const CmdEntry> {
-  /// @brief Array of commands supported by this text editor.
-  /// @note Ensure this array is **sorted**, as the search algorithm uses
-  /// binary search.
+  // NOTE: This should always remain sorted, as the search uses binary search
+  // algorithm.
   static const std::array COMMANDS{
       CmdEntry{.name = "qall",
                .namelen = 2,

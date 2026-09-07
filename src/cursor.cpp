@@ -6,7 +6,7 @@ auto Cursor::getCorrectCol(const Buffer &buff) const -> int {
   if (buff.empty()) {
     return 0;
   }
-  auto len = static_cast<int>(buff.getLines()[line_].size());
+  auto len = static_cast<int>(buff.getLines().at(line_).size());
   return std::min(desired_col_, len);
 }
 
@@ -14,7 +14,7 @@ void Cursor::moveRight(const Buffer &buff) {
   if (buff.empty()) {
     return;
   }
-  auto len = static_cast<int>(buff.getLines()[line_].size());
+  auto len = static_cast<int>(buff.getLines().at(line_).size());
   if (col_ < len) {
     ++col_;
   }
@@ -42,4 +42,11 @@ void Cursor::moveDown(const Buffer &buff) {
   }
   ++line_;
   col_ = getCorrectCol(buff);
+}
+
+void Cursor::moveRightInsert() { desired_col_ = ++col_; }
+
+void Cursor::setCol(int col) {
+  col_ = col;
+  desired_col_ = col;
 }

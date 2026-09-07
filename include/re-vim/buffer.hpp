@@ -17,7 +17,8 @@ public:
   /// @brief True if the file is empty.
   [[nodiscard]] auto empty() const -> bool { return lines_.empty(); };
 
-  /// @brief Loads file from `filename_`, empty buffer if cannot be opened.
+  /// @brief Loads file from `filename_`. Guarantees at least one (possibly
+  /// empty) line if the file cannot be opened or is empty.
   void load();
 
   /// @brief Saves file to `filename_`. The replacement of file is atomic (on
@@ -28,4 +29,30 @@ public:
   [[nodiscard]] auto getLines() const -> const std::vector<std::string> & {
     return lines_;
   }
+
+  /// @brief Insertion of character in between lines.
+  /// @param[in] c The character to insert.
+  /// @param[in] line The line index.
+  /// @param[in] col the index of line where to add char.
+  void insertChar(char c, int line, int col);
+
+  /// @brief Deletion of character in between lines.
+  /// @param[in] line The line index.
+  /// @param[in] col the index of line where to delete char.
+  void deleteChar(int line, int col);
+
+  /// @brief Insertion of character in between lines.
+  /// @param[in] line The line index.
+  /// @param[in] col The column index of the text where to split line.
+  void insertLine(int line, int col);
+
+  /// @brief Deletion of line.
+  /// @param[in] line The line number to delete.
+  void deleteLine(int line);
+
+  /// @brief Joins `line` into `line - 1` (appends its content), then deletes
+  /// `line`.
+  /// @note No-op if `line` is the first line (nothing to join into).
+  /// @param[in] line The line to join upward into its predecessor.
+  void joinLineUp(int line);
 };

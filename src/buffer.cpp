@@ -3,6 +3,7 @@
 #include <re-vim/buffer.hpp>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 namespace fs = std::filesystem;
 
@@ -10,6 +11,9 @@ void Buffer::load() {
   std::ifstream file(filename_);
   for (std::string line; std::getline(file, line);) {
     lines_.push_back(line);
+  }
+  if (lines_.empty()) {
+    lines_.emplace_back();
   }
 }
 
@@ -31,4 +35,51 @@ void Buffer::save() {
     fs::remove(filename_);
   }
   fs::rename(tmp_name, filename_);
+
+  // Now the buffer isn't modified, since it is in sync with file.
+  modified = false;
+}
+
+void Buffer::insertChar(char c, int line, int col) {
+  lines_.at(line).insert(col, 1, c);
+  modified = true;
+}
+void Buffer::deleteChar(int line, int col) {
+  lines_.at(line).erase(col, 1);
+  modified = true;
+}
+
+void Buffer::insertLine(int line, int col) {
+  if (std::cmp_greater_equal(line, lines_.size())) {
+    return;
+  }
+  if (std::cmp_greater(col, lines_.at(line).size())) {
+    return;
+  }
+
+  if (std::cmp_equal(col, lines_.at(line).size())) {
+    lines_.insert(lines_.begin() + line + 1, "");
+  } else {
+    std::string tail = std::move(lines_.at(line));
+    lines_.at(line).assign(tail, 0, col);
+    tail.erase(0, col);
+    lines_.insert(lines_.begin() + line + 1, std::move(tail));
+  }
+  modified = true;
+}
+
+void Buffer::deleteLine(int line) {
+  if (line < 0 || std::cmp_greater_equal(line, lines_.size())) {
+    return;
+  }
+  lines_.erase(lines_.begin() + line);
+  modified = true;
+}
+
+void Buffer::joinLineUp(int line) {
+  if (line <= 0 || std::cmp_greater_equal(line, lines_.size())) {
+    return;
+  }
+  lines_.at(line - 1) += lines_.at(line);
+  deleteLine(line);
 }
