@@ -4,11 +4,16 @@
 #include <re-vim/globals.hpp>
 
 namespace {
-void quitCmd(Command & /*cmd*/) { global_vars::termination_flag = true; }
+void quitCmd(const Command &cmd) {
+  if (global_vars::curr_buffer->modified && !cmd.forceit) {
+    return;
+  }
+  global_vars::termination_flag = true;
+}
 
 void writeCmd(Command & /*cmd*/) {
-  if (global_vars::g_buffer != nullptr) {
-    global_vars::g_buffer->save();
+  if (global_vars::curr_buffer != nullptr) {
+    global_vars::curr_buffer->save();
   }
 }
 } // namespace
@@ -17,18 +22,8 @@ auto getCommandsArray() -> std::span<const CmdEntry> {
   // NOTE: This should always remain sorted, as the search uses binary search
   // algorithm.
   static const std::array COMMANDS{
-      CmdEntry{.name = "qall",
-               .namelen = 2,
-               .handler = quitCmd,
-               .flags = FlagCmd::Notrlbar,
-               .addr_type = AddrType::NONE},
       CmdEntry{.name = "quit",
                .namelen = 1,
-               .handler = quitCmd,
-               .flags = FlagCmd::Notrlbar,
-               .addr_type = AddrType::NONE},
-      CmdEntry{.name = "quitall",
-               .namelen = 2,
                .handler = quitCmd,
                .flags = FlagCmd::Notrlbar,
                .addr_type = AddrType::NONE},

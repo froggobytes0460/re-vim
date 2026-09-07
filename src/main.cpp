@@ -24,7 +24,7 @@ constexpr char KEY_TERM_BACKSPACE{127};
 /// @param[in] argv Argument list (as C-style array given by main func)
 /// @param[out] ok Set to false if parsing failed.
 /// @return Filename argument, or `nullopt` + prints usage/error on failure.
-auto parseArgs(int argc, char **argv) -> std::optional<std::string> {
+auto parseArgs(int argc, const char **argv) -> std::optional<std::string> {
   try {
     argparse::ArgumentParser program("re-vim", "0.1.0");
     program.add_argument("filename")
@@ -145,7 +145,7 @@ void handleInsertMode(int ch, Buffer &buf, Cursor &curs) {
   }
 }
 
-auto main(int argc, char *argv[]) -> int {
+auto main(int argc, const char *argv[]) -> int {
   std::optional<std::string> filename = parseArgs(argc, argv);
   if (!filename.has_value()) {
     return 1;
@@ -157,7 +157,7 @@ auto main(int argc, char *argv[]) -> int {
 
     Buffer buffer(*filename);
     buffer.load();
-    global_vars::g_buffer = &buffer;
+    global_vars::curr_buffer = &buffer;
 
     drawBuffer(buffer);
 

@@ -10,7 +10,7 @@ inline bool termination_flag{false};
 
 /// @brief Active buffer, set by main() so command handlers can reach it.
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-inline Buffer *g_buffer{nullptr};
+inline Buffer *curr_buffer{nullptr};
 
 /// @brief Cursor mode.
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
