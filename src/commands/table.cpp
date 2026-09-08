@@ -18,10 +18,15 @@ void writeCmd(Command & /*cmd*/) {
 }
 } // namespace
 
-auto getCommandsArray() -> std::span<const CmdEntry> {
+auto getCommandsArray() noexcept -> std::span<const CmdEntry> {
   // NOTE: This should always remain sorted, as the search uses binary search
   // algorithm.
   static const std::array COMMANDS{
+      CmdEntry{.name = "qall",
+               .namelen = 2,
+               .handler = quitCmd,
+               .flags = FlagCmd::Notrlbar,
+               .addr_type = AddrType::NONE},
       CmdEntry{.name = "quit",
                .namelen = 1,
                .handler = quitCmd,

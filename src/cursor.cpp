@@ -10,7 +10,7 @@ auto Cursor::getCorrectCol(const Buffer &buff) const -> int {
   return std::min(desired_col_, len);
 }
 
-void Cursor::moveRight(const Buffer &buff) {
+void Cursor::moveRight(const Buffer &buff) noexcept {
   if (buff.empty()) {
     return;
   }
@@ -21,14 +21,14 @@ void Cursor::moveRight(const Buffer &buff) {
   desired_col_ = col_;
 }
 
-void Cursor::moveLeft() {
+void Cursor::moveLeft() noexcept {
   if (col_ > 0) {
     --col_;
   }
   desired_col_ = col_;
 }
 
-void Cursor::moveUp(const Buffer &buff) {
+void Cursor::moveUp(const Buffer &buff) noexcept {
   if (line_ == 0) {
     return;
   }
@@ -36,7 +36,7 @@ void Cursor::moveUp(const Buffer &buff) {
   col_ = getCorrectCol(buff);
 }
 
-void Cursor::moveDown(const Buffer &buff) {
+void Cursor::moveDown(const Buffer &buff) noexcept {
   if (line_ + 1 >= static_cast<int>(buff.getLines().size())) {
     return;
   }
@@ -44,9 +44,9 @@ void Cursor::moveDown(const Buffer &buff) {
   col_ = getCorrectCol(buff);
 }
 
-void Cursor::moveRightInsert() { desired_col_ = ++col_; }
+void Cursor::moveRightInsert() noexcept { desired_col_ = ++col_; }
 
-void Cursor::setCol(int col) {
+void Cursor::setCol(int col) noexcept {
   col_ = col;
   desired_col_ = col;
 }

@@ -3,7 +3,7 @@
 #include <re-vim/commands.hpp>
 #include <string_view>
 
-[[nodiscard]] auto searchForCmd(std::string_view cmd) -> CmdMatch {
+[[nodiscard]] auto searchForCmd(std::string_view cmd) noexcept -> CmdMatch {
   const auto &entry_array = getCommandsArray();
 
   // Getting the final character of the command name.

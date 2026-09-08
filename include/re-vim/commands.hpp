@@ -76,7 +76,7 @@ struct Range {
 };
 
 /// @brief Get pre-computed array of commands.
-auto getCommandsArray() -> std::span<const CmdEntry>;
+auto getCommandsArray() noexcept -> std::span<const CmdEntry>;
 
 /// @brief Reads command-line input from the user after @ref COMMAND_KEY is
 /// pressed.
@@ -92,4 +92,4 @@ void callCmd(std::string_view cmd);
 /// @param[in] cmd User string to find command from.
 /// @return Command entry found (nullptr if not found) and the letters of the
 /// command already put by the user (0 if no commmand found).
-auto searchForCmd(std::string_view cmd) -> CmdMatch;
+auto searchForCmd(std::string_view cmd) noexcept -> CmdMatch;

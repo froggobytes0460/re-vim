@@ -25,24 +25,24 @@ public:
 
   /// @brief Moves cursor right, stays on EOL if reached.
   /// @param[in] buff Uses buffer to safeguard move ops.
-  void moveRight(const Buffer &buff);
+  void moveRight(const Buffer &buff) noexcept;
 
   /// @brief Moves cursor left, stays on first char if reached.
-  void moveLeft();
+  void moveLeft() noexcept;
 
   /// @brief Moves cursor up, stays on first line if reached.
   /// @param[in] buff Uses buffer to safeguard move ops.
-  void moveUp(const Buffer &buff);
+  void moveUp(const Buffer &buff) noexcept;
 
   /// @brief Moves cursor down, stays on EOF if reached.
   /// @param[in] buff Uses buffer to safeguard move ops.
-  void moveDown(const Buffer &buff);
+  void moveDown(const Buffer &buff) noexcept;
 
   /// @brief Advance one column after insertion.
-  void moveRightInsert();
+  void moveRightInsert() noexcept;
 
   /// @brief Directly sets the column, e.g. to reposition after a line split
   /// or join. Also updates `desired_col_`.
   /// @param[in] col Column to set.
-  void setCol(int col);
+  void setCol(int col) noexcept;
 };
