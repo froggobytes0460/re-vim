@@ -81,7 +81,7 @@ auto getCommandsArray() -> std::span<const CmdEntry>;
 /// @brief Reads command-line input from the user after @ref COMMAND_KEY is
 /// pressed.
 /// @return Text entered by the user, excluding the leading @ref COMMAND_KEY.
-auto readCommandLine() -> std::string;
+auto readCommandLine() noexcept -> std::string;
 
 /// @brief Calls the vim command. Doesn't return anything but has side-effects
 /// (vim command function is called).

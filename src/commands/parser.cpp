@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <re-vim/commands.hpp>
+#include <re-vim/globals.hpp>
 #include <string>
 
 constexpr char KEY_ESC{27};
@@ -8,21 +9,19 @@ constexpr int HIGHEST_ASCII_SUPPORTED{126};
 constexpr int LOWEST_ASCII_SUPPORTED{32};
 
 [[nodiscard("Do not ignore command line input from user.")]] auto
-readCommandLine() -> std::string {
-  int prev_x{};
-  int prev_y{};
-  getyx(stdscr, prev_y, prev_x);
+readCommandLine() noexcept -> std::string {
+  WINDOW *status_win = global_vars::status_win;
 
-  move(LINES - 1, 0);
-  clrtoeol();
+  wmove(status_win, 0, 0);
+  wclrtoeol(status_win);
 
-  addch(COMMAND_KEY);
-  refresh();
+  waddch(status_win, COMMAND_KEY);
+  wrefresh(status_win);
 
   std::string cmd{};
 
   int ch{};
-  while ((ch = getch()) != '\n' && ch != '\r') {
+  while ((ch = wgetch(status_win)) != '\n' && ch != '\r') {
     if (ch == ERR) {
       continue;
     }
@@ -38,11 +37,11 @@ readCommandLine() -> std::string {
         int y{};
         int x{};
 
-        getyx(stdscr, y, x);
-        move(y, x - 1);
+        getyx(status_win, y, x);
+        wmove(status_win, y, x - 1);
 
-        delch();
-        refresh();
+        wdelch(status_win);
+        wrefresh(status_win);
       }
       continue;
     }
@@ -51,15 +50,14 @@ readCommandLine() -> std::string {
       continue;
     }
 
-    addch(ch);
+    waddch(status_win, ch);
     cmd += static_cast<char>(ch);
-    refresh();
+    wrefresh(status_win);
   }
 
-  move(LINES - 1, 0);
-  clrtoeol();
-
-  move(prev_y, prev_x);
+  wmove(status_win, 0, 0);
+  wclrtoeol(status_win);
+  wrefresh(status_win);
 
   return cmd;
 }
