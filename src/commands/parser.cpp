@@ -8,8 +8,7 @@ constexpr char KEY_TERM_BACKSPACE{8};
 constexpr int HIGHEST_ASCII_SUPPORTED{126};
 constexpr int LOWEST_ASCII_SUPPORTED{32};
 
-[[nodiscard("Do not ignore command line input from user.")]] auto
-readCommandLine() noexcept -> std::string {
+[[nodiscard]] auto readCommandLine() noexcept -> std::string {
   WINDOW *status_win = global_vars::status_win;
 
   wmove(status_win, 0, 0);

@@ -53,7 +53,7 @@ auto parseArgs(int argc, const char **argv) noexcept
 /// @param[in] text_win Window to draw into.
 /// @param[in] buffer Buffer to draw from.
 /// @param[in] top_line First buffer line visible at the top of `text_win`.
-void drawBuffer(WINDOW *text_win, const Buffer &buffer, int top_line) noexcept {
+void drawBuffer(WINDOW *text_win, const Buffer &buffer, int top_line) {
   werase(text_win);
   wmove(text_win, 0, 0);
   const auto &lines = buffer.getLines();
@@ -99,30 +99,42 @@ void clampViewport(const Cursor &cursor, int &top_line, int height) noexcept {
 /// @return False if the command-line was invoked and the caller should
 /// `continue` its loop iteration.
 auto handleNormalMode(int ch, Cursor &cursor, Buffer &buffer) noexcept -> bool {
-  if (ch == 'i') {
-    global_vars::mode = Mode::INSERT;
-    return true;
-  }
-  if (ch == 'a') {
+  switch (ch) {
+  case 'a':
     cursor.moveRight(buffer);
+    [[fallthrough]];
+  case 'i':
     global_vars::mode = Mode::INSERT;
-    return true;
-  }
-  if (ch == COMMAND_KEY) {
+    break;
+  case COMMAND_KEY: {
     std::string cmd = readCommandLine();
     callCmd(cmd);
     return false;
   }
-
-  if (ch == KEY_RIGHT || ch == 'l') {
+  case KEY_RIGHT:
+    [[fallthrough]];
+  case 'l':
     cursor.moveRight(buffer);
-  } else if (ch == KEY_LEFT || ch == 'h') {
+    break;
+  case KEY_LEFT:
+    [[fallthrough]];
+  case 'h':
     cursor.moveLeft();
-  } else if (ch == KEY_UP || ch == 'k') {
+    break;
+  case KEY_UP:
+    [[fallthrough]];
+  case 'k':
     cursor.moveUp(buffer);
-  } else if (ch == KEY_DOWN || ch == 'j') {
+    break;
+  case KEY_DOWN:
+    [[fallthrough]];
+  case 'j':
     cursor.moveDown(buffer);
+    break;
+  default:
+    break;
   }
+
   return true;
 }
 
@@ -178,7 +190,7 @@ void handleInsertMode(int ch, Buffer &buf, Cursor &curs, WINDOW *text_win,
   }
 }
 
-auto main(int argc, const char *argv[]) noexcept -> int {
+auto main(int argc, const char *argv[]) -> int {
   std::optional<std::string> filename = parseArgs(argc, argv);
   if (!filename.has_value()) {
     return 1;

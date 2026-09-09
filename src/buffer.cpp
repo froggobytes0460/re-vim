@@ -40,16 +40,16 @@ void Buffer::save() {
   modified = false;
 }
 
-void Buffer::insertChar(char c, int line, int col) noexcept {
+void Buffer::insertChar(char c, int line, int col) {
   lines_.at(line).insert(col, 1, c);
   modified = true;
 }
-void Buffer::deleteChar(int line, int col) noexcept {
+void Buffer::deleteChar(int line, int col) {
   lines_.at(line).erase(col, 1);
   modified = true;
 }
 
-void Buffer::insertLine(int line, int col) noexcept {
+void Buffer::insertLine(int line, int col) {
   if (std::cmp_greater_equal(line, lines_.size())) {
     return;
   }
@@ -68,7 +68,7 @@ void Buffer::insertLine(int line, int col) noexcept {
   modified = true;
 }
 
-void Buffer::deleteLine(int line) noexcept {
+void Buffer::deleteLine(int line) {
   if (line < 0 || std::cmp_greater_equal(line, lines_.size())) {
     return;
   }
@@ -76,7 +76,7 @@ void Buffer::deleteLine(int line) noexcept {
   modified = true;
 }
 
-void Buffer::joinLineUp(int line) noexcept {
+void Buffer::joinLineUp(int line) {
   if (line <= 0 || std::cmp_greater_equal(line, lines_.size())) {
     return;
   }

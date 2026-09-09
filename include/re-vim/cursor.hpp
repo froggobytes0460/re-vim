@@ -25,18 +25,18 @@ public:
 
   /// @brief Moves cursor right, stays on EOL if reached.
   /// @param[in] buff Uses buffer to safeguard move ops.
-  void moveRight(const Buffer &buff) noexcept;
+  void moveRight(const Buffer &buff);
 
   /// @brief Moves cursor left, stays on first char if reached.
   void moveLeft() noexcept;
 
   /// @brief Moves cursor up, stays on first line if reached.
   /// @param[in] buff Uses buffer to safeguard move ops.
-  void moveUp(const Buffer &buff) noexcept;
+  void moveUp(const Buffer &buff);
 
   /// @brief Moves cursor down, stays on EOF if reached.
   /// @param[in] buff Uses buffer to safeguard move ops.
-  void moveDown(const Buffer &buff) noexcept;
+  void moveDown(const Buffer &buff);
 
   /// @brief Advance one column after insertion.
   void moveRightInsert() noexcept;
