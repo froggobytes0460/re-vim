@@ -37,16 +37,16 @@ void Buffer::save() {
   fs::rename(tmp_name, filename_);
 
   // Now the buffer isn't modified, since it is in sync with file.
-  modified = false;
+  modified_ = false;
 }
 
 void Buffer::insertChar(char c, int line, int col) {
   lines_.at(line).insert(col, 1, c);
-  modified = true;
+  modified_ = true;
 }
 void Buffer::deleteChar(int line, int col) {
   lines_.at(line).erase(col, 1);
-  modified = true;
+  modified_ = true;
 }
 
 void Buffer::insertLine(int line, int col) {
@@ -61,11 +61,18 @@ void Buffer::insertLine(int line, int col) {
     lines_.insert(lines_.begin() + line + 1, "");
   } else {
     std::string tail = std::move(lines_.at(line));
+
+    // Since lines_[line] is now in an undefined state, refill it with the part
+    // of string before cursor.
     lines_.at(line).assign(tail, 0, col);
+
+    // Remove part of string before cursor from tail now that lines_[line] has
+    // recieved it.
     tail.erase(0, col);
+
     lines_.insert(lines_.begin() + line + 1, std::move(tail));
   }
-  modified = true;
+  modified_ = true;
 }
 
 void Buffer::deleteLine(int line) {
@@ -73,7 +80,7 @@ void Buffer::deleteLine(int line) {
     return;
   }
   lines_.erase(lines_.begin() + line);
-  modified = true;
+  modified_ = true;
 }
 
 void Buffer::joinLineUp(int line) {

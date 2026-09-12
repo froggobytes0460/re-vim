@@ -2,6 +2,8 @@
 #include <argparse/argparse.hpp>
 #include <cctype>
 #include <climits>
+#include <cstddef>
+#include <exception>
 #include <iostream>
 #include <ncurses.h>
 #include <optional>
@@ -13,17 +15,27 @@
 #include <re-vim/terminal.hpp>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
+namespace {
 /// @brief Escape key as per ASCII.
 constexpr char KEY_ESC{27};
 
 /// @brief Usual terminal backspace/deletion key as per ASCII.
 constexpr char KEY_TERM_BACKSPACE{127};
 
+/// @brief Prints error message on status window with red highligting.
+void printError(const std::string_view &err) noexcept {
+  wattron(global_vars::status_win, COLOR_PAIR(Terminal::ERROR_PAIR));
+
+  wprintw(global_vars::status_win, "E: %.*s", static_cast<int>(err.size()),
+          err.data());
+  wattroff(global_vars::status_win, COLOR_PAIR(Terminal::ERROR_PAIR));
+}
+
 /// @brief Parses CLI args.
 /// @param[in] argc Argument Count (given by main func)
 /// @param[in] argv Argument list (as C-style array given by main func)
-/// @param[out] ok Set to false if parsing failed.
 /// @return Filename argument, or `nullopt` + prints usage/error on failure.
 auto parseArgs(int argc, const char **argv) noexcept
     -> std::optional<std::string> {
@@ -107,8 +119,23 @@ auto handleNormalMode(int ch, Cursor &cursor, Buffer &buffer) noexcept -> bool {
     global_vars::mode = Mode::INSERT;
     break;
   case COMMAND_KEY: {
-    std::string cmd = readCommandLine();
-    callCmd(cmd);
+    std::string cmd_temp = readCommandLine();
+    try {
+      std::string_view cmd_str(cmd_temp);
+      CmdMatch match = searchForCmd(cmd_str);
+      if (match.entry == nullptr) {
+        break;
+      }
+      if (match.entry->handler == nullptr) {
+        break;
+      }
+      Command cmd = constructCmdStruct(cmd_str, match);
+      match.entry->handler(cmd);
+    } catch (std::exception &err) {
+      wmove(global_vars::status_win, 0, 0);
+      wclrtoeol(global_vars::status_win);
+      printError(err.what());
+    }
     return false;
   }
   case KEY_RIGHT:
@@ -147,9 +174,13 @@ auto handleNormalMode(int ch, Cursor &cursor, Buffer &buffer) noexcept -> bool {
 /// proper scrolling.
 void handleInsertMode(int ch, Buffer &buf, Cursor &curs, WINDOW *text_win,
                       int top_line) {
-  if (ch == KEY_ESC) {
+  switch (ch) {
+  case KEY_ESC:
     global_vars::mode = Mode::NORMAL;
-  } else if (ch == KEY_BACKSPACE || ch == KEY_TERM_BACKSPACE) {
+    break;
+  case KEY_BACKSPACE:
+    [[fallthrough]];
+  case KEY_TERM_BACKSPACE:
     if (curs.col() > 0) {
       buf.deleteChar(curs.line(), curs.col() - 1);
 
@@ -166,20 +197,32 @@ void handleInsertMode(int ch, Buffer &buf, Cursor &curs, WINDOW *text_win,
       curs.setCol(prev_len);
       drawBuffer(text_win, buf, top_line);
     }
-  } else if (ch == KEY_RIGHT) {
+    break;
+  case KEY_RIGHT:
     curs.moveRight(buf);
-  } else if (ch == KEY_LEFT) {
+    break;
+  case KEY_LEFT:
     curs.moveLeft();
-  } else if (ch == KEY_UP) {
+    break;
+  case KEY_UP:
     curs.moveUp(buf);
-  } else if (ch == KEY_DOWN) {
+    break;
+  case KEY_DOWN:
     curs.moveDown(buf);
-  } else if (ch == KEY_ENTER || ch == '\n' || ch == '\r') {
+    break;
+  case KEY_ENTER:
+    [[fallthrough]];
+  case '\n':
     buf.insertLine(curs.line(), curs.col());
     curs.moveDown(buf);
     curs.setCol(0);
     drawBuffer(text_win, buf, top_line);
-  } else if (ch >= 0 && ch <= UCHAR_MAX && isprint(ch) != 0) {
+    break;
+  default:
+    break;
+  }
+
+  if (ch >= 0 && ch <= UCHAR_MAX && isprint(ch) != 0) {
     buf.insertChar(static_cast<char>(ch), curs.line(), curs.col());
 
     wmove(text_win, curs.line() - top_line, 0);
@@ -189,6 +232,7 @@ void handleInsertMode(int ch, Buffer &buf, Cursor &curs, WINDOW *text_win,
     curs.moveRightInsert();
   }
 }
+} // namespace
 
 auto main(int argc, const char *argv[]) -> int {
   std::optional<std::string> filename = parseArgs(argc, argv);

@@ -8,6 +8,10 @@ Terminal::Terminal() {
   curs_set(1);
   set_escdelay(25);
 
+  start_color();
+  init_pair(ERROR_PAIR, COLOR_WHITE, COLOR_RED);
+
+  // Cannot initialize these attributes before `initscr()`.
   // NOLINTBEGIN(cppcoreguidelines-prefer-member-initializer)
   text_win_ = newwin(LINES - 1, COLS, 0, 0);
   status_win_ = newwin(1, COLS, LINES - 1, 0);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <ncurses.h>
 
 /// @brief  RAII class wrapper on `ncurses` init/destruct. Deletes all copy and
@@ -13,6 +14,9 @@ private:
   WINDOW *status_win_{};
 
 public:
+  /// @brief Color pair id for vim-style error messages (white on red).
+  static constexpr uint8_t ERROR_PAIR{1};
+
   Terminal();
   ~Terminal();
 

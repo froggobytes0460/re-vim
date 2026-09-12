@@ -10,8 +10,8 @@ class Buffer {
 private:
   std::vector<std::string> lines_; ///< Vector of lines, seperated by '\\n'
   std::string filename_;           ///< Name of file
+  bool modified_{false};           ///< True if any edits been made.
 public:
-  bool modified{false}; ///< True if any edits been made.
   explicit Buffer(std::string filename) : filename_(std::move(filename)) {}
 
   /// @brief True if the file is empty.
@@ -29,6 +29,9 @@ public:
   [[nodiscard]] auto getLines() const -> const std::vector<std::string> & {
     return lines_;
   }
+
+  /// @brief State of syncronization between buffer and file.
+  [[nodiscard]] auto isSyncronized() const -> bool { return !modified_; }
 
   /// @brief Insertion of character in between lines.
   /// @param[in] c The character to insert.

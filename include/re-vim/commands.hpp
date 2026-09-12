@@ -76,20 +76,22 @@ struct Range {
 };
 
 /// @brief Get pre-computed array of commands.
-auto getCommandsArray() noexcept -> std::span<const CmdEntry>;
+[[nodiscard]] auto getCommandsArray() noexcept -> std::span<const CmdEntry>;
 
 /// @brief Reads command-line input from the user after @ref COMMAND_KEY is
 /// pressed.
 /// @return Text entered by the user, excluding the leading @ref COMMAND_KEY.
-auto readCommandLine() noexcept -> std::string;
-
-/// @brief Calls the vim command. Doesn't return anything but has side-effects
-/// (vim command function is called).
-/// @param[in] cmd Command to call (user input).
-void callCmd(std::string_view cmd);
+[[nodiscard]] auto readCommandLine() noexcept -> std::string;
 
 /// @brief Searches for command.
 /// @param[in] cmd User string to find command from.
 /// @return Command entry found (nullptr if not found) and the letters of the
 /// command already put by the user (0 if no commmand found).
-auto searchForCmd(std::string_view cmd) noexcept -> CmdMatch;
+[[nodiscard]] auto searchForCmd(std::string_view cmd) noexcept -> CmdMatch;
+
+/// @brief Constucts a proper command struct from command, used to pass to
+/// command handler.
+/// @param[in] cmd The command string.
+/// @return Command struct including necessary data to run the command handler.
+[[nodiscard]] auto constructCmdStruct(std::string_view cmd, CmdMatch match)
+    -> Command;

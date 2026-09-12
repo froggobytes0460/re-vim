@@ -3,10 +3,10 @@
 #include <re-vim/commands.hpp>
 #include <string_view>
 
-[[nodiscard]] auto searchForCmd(std::string_view cmd) noexcept -> CmdMatch {
+auto searchForCmd(std::string_view cmd) noexcept -> CmdMatch {
   const auto &entry_array = getCommandsArray();
 
-  // Getting the final character of the command name.
+  // Getting the first non-alphabetical character of the command string.
   const auto *name_end = std::ranges::find_if(
       cmd, [](char l) -> bool { return std::isalpha(l) == 0; });
 
@@ -27,12 +27,7 @@
   return {};
 }
 
-void callCmd(std::string_view cmd) {
-  CmdMatch match = searchForCmd(cmd);
-  if (match.entry == nullptr) {
-    return;
-  }
-
+auto constructCmdStruct(std::string_view cmd, CmdMatch match) -> Command {
   Command cmd_struct{};
 
   if (cmd.at(match.consumed - 1) == '!') {
@@ -42,8 +37,5 @@ void callCmd(std::string_view cmd) {
     cmd_struct.arg = cmd.substr(match.consumed);
   }
 
-  if (match.entry->handler == nullptr) {
-    return;
-  }
-  match.entry->handler(cmd_struct);
+  return cmd_struct;
 }

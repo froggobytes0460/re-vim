@@ -5,7 +5,7 @@
 
 namespace {
 void quitCmd(const Command &cmd) {
-  if (global_vars::curr_buffer->modified && !cmd.forceit) {
+  if (!global_vars::curr_buffer->isSyncronized() && !cmd.forceit) {
     return;
   }
   global_vars::termination_flag = true;
