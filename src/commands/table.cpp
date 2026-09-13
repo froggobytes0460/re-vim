@@ -38,12 +38,12 @@ auto getCommandsArray() noexcept -> std::span<const CmdEntry> {
                  writeCmd(cmd);
                  quitCmd(cmd);
                },
-               .flags = FlagCmd::Range,
+               .flags = FlagCmd::RangeCmd,
                .addr_type = AddrType::LINES},
       CmdEntry{.name = "write",
                .namelen = 1,
                .handler = writeCmd,
-               .flags = FlagCmd::Range,
+               .flags = FlagCmd::RangeCmd,
                .addr_type = AddrType::LINES}};
   return COMMANDS;
 }

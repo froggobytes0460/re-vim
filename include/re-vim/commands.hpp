@@ -6,6 +6,7 @@
 #include <string>
 
 class Buffer;
+class Cursor;
 
 /// @brief Character that opens the command-line prompt (`:`).
 constexpr char COMMAND_KEY{':'};
@@ -14,7 +15,7 @@ struct Command;
 
 /// @brief Flags vim commands can have.
 enum FlagCmd : uint16_t {
-  Range = 0x001, ///< Command accepts a line range (e.g. `:1,5d`).
+  RangeCmd = 0x001, ///< Command accepts a line range (e.g. `:1,5d`).
   Bang = 0x002,  ///< Command accepts a `!` modifier (e.g. `:q!`).
   Extra = 0x004, ///< Command accepts extra (non-argument) chars after its name.
   Xfile = 0x008, ///< Argument is a filename, subject to filename expansion.
@@ -60,19 +61,21 @@ struct Command {
   std::string arg; ///< Remaining argument text after the command name.
 };
 
+/// @brief Parsed line range (e.g. `1,5`) before resolution against a buffer.
+struct Range {
+  int line1{0};      ///< First line of the range.
+  int line2{0};      ///< Last line of the range.
+  int addr_count{0}; ///< Number of addresses supplied (0, 1, or 2).
+  bool valid{false}; ///< Whether parsing produced a valid range.
+};
+
 /// @brief Result of matching input text against known @ref CmdEntry
 /// definitions.
 struct CmdMatch {
   const CmdEntry *entry =
       nullptr;       ///< Matched command definition, or nullptr if none.
-  size_t consumed{}; ///< Chars of input eaten by the name.
-};
-
-/// @brief Parsed line range (e.g. `1,5`) before resolution against a buffer.
-struct Range {
-  int line1{0};      ///< First line of the range.
-  int line2{0};      ///< Last line of the range.
-  bool valid{false}; ///< Whether parsing produced a valid range.
+  size_t consumed{}; ///< Chars of input eaten by the range and name.
+  Range range; ///< Range parsed before the command name, if any.
 };
 
 /// @brief Get pre-computed array of commands.
@@ -83,11 +86,15 @@ struct Range {
 /// @return Text entered by the user, excluding the leading @ref COMMAND_KEY.
 [[nodiscard]] auto readCommandLine() noexcept -> std::string;
 
-/// @brief Searches for command.
+/// @brief Searches for command, parsing a leading range (`1,5`, `.`, `$`,
+/// `%`) if present.
 /// @param[in] cmd User string to find command from.
-/// @return Command entry found (nullptr if not found) and the letters of the
-/// command already put by the user (0 if no commmand found).
-[[nodiscard]] auto searchForCmd(std::string_view cmd) noexcept -> CmdMatch;
+/// @param[in] cursor Used to resolve `.` to the current line.
+/// @param[in] buffer Used to resolve `$`/`%` to the last line.
+/// @return Command entry found (nullptr if not found), chars of input
+/// consumed by the range and name, and the parsed range (if any).
+[[nodiscard]] auto searchForCmd(std::string_view cmd, const Cursor &cursor,
+                                 const Buffer &buffer) -> CmdMatch;
 
 /// @brief Constucts a proper command struct from command, used to pass to
 /// command handler.

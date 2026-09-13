@@ -122,7 +122,7 @@ auto handleNormalMode(int ch, Cursor &cursor, Buffer &buffer) noexcept -> bool {
     std::string cmd_temp = readCommandLine();
     try {
       std::string_view cmd_str(cmd_temp);
-      CmdMatch match = searchForCmd(cmd_str);
+      CmdMatch match = searchForCmd(cmd_str, cursor, buffer);
       if (match.entry == nullptr) {
         break;
       }
