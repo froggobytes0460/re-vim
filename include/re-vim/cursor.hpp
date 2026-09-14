@@ -25,18 +25,22 @@ public:
 
   /// @brief Moves cursor right, stays on EOL if reached.
   /// @param[in] buff Uses buffer to safeguard move ops.
-  void moveRight(const Buffer &buff);
+  /// @param[in] count Number of times to repeat the move.
+  void moveRight(const Buffer &buff, int count = 1);
 
   /// @brief Moves cursor left, stays on first char if reached.
-  void moveLeft() noexcept;
+  /// @param[in] count Number of times to repeat the move. (1 is default.)
+  void moveLeft(int count = 1) noexcept;
 
   /// @brief Moves cursor up, stays on first line if reached.
   /// @param[in] buff Uses buffer to safeguard move ops.
-  void moveUp(const Buffer &buff);
+  /// @param[in] count Number of times to repeat the move. (1 is default.)
+  void moveUp(const Buffer &buff, int count = 1);
 
   /// @brief Moves cursor down, stays on EOF if reached.
   /// @param[in] buff Uses buffer to safeguard move ops.
-  void moveDown(const Buffer &buff);
+  /// @param[in] count Number of times to repeat the move. (1 is default.)
+  void moveDown(const Buffer &buff, int count = 1);
 
   /// @brief Advance one column after insertion.
   void moveRightInsert() noexcept;

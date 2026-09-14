@@ -16,7 +16,7 @@ struct Command;
 /// @brief Flags vim commands can have.
 enum FlagCmd : uint16_t {
   RangeCmd = 0x001, ///< Command accepts a line range (e.g. `:1,5d`).
-  Bang = 0x002,  ///< Command accepts a `!` modifier (e.g. `:q!`).
+  Bang = 0x002,     ///< Command accepts a `!` modifier (e.g. `:q!`).
   Extra = 0x004, ///< Command accepts extra (non-argument) chars after its name.
   Xfile = 0x008, ///< Argument is a filename, subject to filename expansion.
   Needarg = 0x080,  ///< Command requires at least one argument.
@@ -75,7 +75,7 @@ struct CmdMatch {
   const CmdEntry *entry =
       nullptr;       ///< Matched command definition, or nullptr if none.
   size_t consumed{}; ///< Chars of input eaten by the range and name.
-  Range range; ///< Range parsed before the command name, if any.
+  Range range;       ///< Range parsed before the command name, if any.
 };
 
 /// @brief Get pre-computed array of commands.
@@ -94,11 +94,13 @@ struct CmdMatch {
 /// @return Command entry found (nullptr if not found), chars of input
 /// consumed by the range and name, and the parsed range (if any).
 [[nodiscard]] auto searchForCmd(std::string_view cmd, const Cursor &cursor,
-                                 const Buffer &buffer) -> CmdMatch;
+                                const Buffer &buffer) -> CmdMatch;
 
 /// @brief Constucts a proper command struct from command, used to pass to
 /// command handler.
 /// @param[in] cmd The command string.
+/// @param[in] match The match found from searching for command in command
+/// entires array.
 /// @return Command struct including necessary data to run the command handler.
 [[nodiscard]] auto constructCmdStruct(std::string_view cmd, CmdMatch match)
     -> Command;

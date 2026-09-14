@@ -24,12 +24,27 @@ constexpr char KEY_ESC{27};
 /// @brief Usual terminal backspace/deletion key as per ASCII.
 constexpr char KEY_TERM_BACKSPACE{127};
 
+/// @brief Tracks in-progress normal-mode input: an accumulated `[count]` and
+/// an operator (e.g. `d`) awaiting its motion.
+struct NormalState {
+  int count = 0;       ///< Accumulated count prefix, 0 means unset.
+  char pending_op = 0; ///< Operator awaiting a motion, 0 means none.
+};
+
 /// @brief Prints error message on status window with red highligting.
 void printError(const std::string_view &err) noexcept {
   wattron(global_vars::status_win, COLOR_PAIR(Terminal::ERROR_PAIR));
 
-  wprintw(global_vars::status_win, "E: %.*s", static_cast<int>(err.size()),
-          err.data());
+  constexpr std::string_view PREFIX{"E: "};
+  int const MAX_LEN = std::max(0, getmaxx(global_vars::status_win) -
+                                      static_cast<int>(PREFIX.size()) - 1);
+  int const LEN = std::min(static_cast<int>(err.size()), MAX_LEN);
+
+  // NOLINTBEGIN(bugprone-suspicious-stringview-data-usage): LEN <=
+  // err.size(), bounded read is safe.
+  wprintw(global_vars::status_win, "E: %.*s", LEN, err.data());
+  // NOLINTEND(bugprone-suspicious-stringview-data-usage)
+
   wattroff(global_vars::status_win, COLOR_PAIR(Terminal::ERROR_PAIR));
 }
 
@@ -104,21 +119,49 @@ void clampViewport(const Cursor &cursor, int &top_line, int height) noexcept {
   }
 }
 
+/// @brief Deletes up to `count` lines starting at the cursor's line, always
+/// leaving at least one line in the buffer.
+/// @param[in] count Number of lines requested for deletion.
+/// @param[in] cursor The cursor state, indicates start line.
+/// @param[in] buffer The buffer to delete lines from.
+void deleteLines(int count, Cursor &cursor, Buffer &buffer) noexcept {
+  auto remaining = static_cast<int>(buffer.getLines().size());
+  int n = std::min(count, std::max(remaining - 1, 0));
+  for (int i = 0; i < n; ++i) {
+    buffer.deleteLine(cursor.line());
+  }
+}
+
 /// @brief Handles a keypress while in Normal mode.
 /// @param[in] ch The character got from user input.
 /// @param[in] cursor The cursor state
 /// @param[in] buffer The buffer to navigate.
+/// @param[in,out] state Accumulated count/pending-operator state across
+/// keypresses.
 /// @return False if the command-line was invoked and the caller should
 /// `continue` its loop iteration.
-auto handleNormalMode(int ch, Cursor &cursor, Buffer &buffer) noexcept -> bool {
+auto handleNormalMode(int ch, Cursor &cursor, Buffer &buffer,
+                      NormalState &state) noexcept -> bool {
+  // Digit accumulation for `[count]` prefix (e.g. `5k`, `12j`). `0` only
+  // continues an existing count so it doesn't clash with a future `0` motion
+  // (move to start of line).
+  if ((ch >= '1' && ch <= '9') || (ch == '0' && state.count != 0)) {
+    state.count = (state.count * 10) + (ch - '0');
+    return true;
+  }
+
+  int count = state.count == 0 ? 1 : state.count;
+
   switch (ch) {
   case 'a':
     cursor.moveRight(buffer);
     [[fallthrough]];
   case 'i':
     global_vars::mode = Mode::INSERT;
+    state = NormalState{};
     break;
   case COMMAND_KEY: {
+    state = NormalState{};
     std::string cmd_temp = readCommandLine();
     try {
       std::string_view cmd_str(cmd_temp);
@@ -141,24 +184,40 @@ auto handleNormalMode(int ch, Cursor &cursor, Buffer &buffer) noexcept -> bool {
   case KEY_RIGHT:
     [[fallthrough]];
   case 'l':
-    cursor.moveRight(buffer);
+    cursor.moveRight(buffer, count);
+    state = NormalState{};
     break;
   case KEY_LEFT:
     [[fallthrough]];
   case 'h':
-    cursor.moveLeft();
+    cursor.moveLeft(count);
+    state = NormalState{};
     break;
   case KEY_UP:
     [[fallthrough]];
   case 'k':
-    cursor.moveUp(buffer);
+    cursor.moveUp(buffer, count);
+    state = NormalState{};
     break;
   case KEY_DOWN:
     [[fallthrough]];
   case 'j':
-    cursor.moveDown(buffer);
+    cursor.moveDown(buffer, count);
+    state = NormalState{};
     break;
+  case 'd':
+    if (state.pending_op == 'd') {
+      deleteLines(count, cursor, buffer);
+      state = NormalState{};
+    } else {
+      state.pending_op = 'd';
+    }
+    break;
+  case KEY_ESC:
+    [[fallthrough]];
   default:
+    // Unrecognized key aborts any pending operator/count, mirroring vim.
+    state = NormalState{};
     break;
   }
 
@@ -243,6 +302,7 @@ auto main(int argc, const char *argv[]) -> int {
   try {
     Terminal terminal;
     Cursor cursor;
+    NormalState normal_state;
     WINDOW *text_win = terminal.textWin();
     WINDOW *status_win = terminal.statusWin();
     global_vars::status_win = status_win;
@@ -265,7 +325,7 @@ auto main(int argc, const char *argv[]) -> int {
 
       switch (global_vars::mode) {
       case Mode::NORMAL:
-        if (!handleNormalMode(ch, cursor, buffer)) {
+        if (!handleNormalMode(ch, cursor, buffer, normal_state)) {
           continue;
         }
         break;
