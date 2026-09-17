@@ -20,15 +20,15 @@ auto parseAddr(std::string_view cmd, const Cursor &cursor, const Buffer &buffer)
     return {-1, 0};
   }
 
-  if (cmd[0] == '.') {
+  if (cmd.front() == '.') {
     return {cursor.line() + 1, 1};
   }
 
-  if (cmd[0] == '$') {
+  if (cmd.front() == '$') {
     return {static_cast<int>(buffer.getLines().size()), 1};
   }
 
-  if (std::isdigit(static_cast<uint8_t>(cmd[0])) == 0) {
+  if (std::isdigit(static_cast<uint8_t>(cmd.front())) == 0) {
     return {-1, 0};
   }
 
@@ -45,7 +45,7 @@ auto parseAddr(std::string_view cmd, const Cursor &cursor, const Buffer &buffer)
 /// `cmd`.
 auto parseRange(std::string_view cmd, const Cursor &cursor,
                 const Buffer &buffer) -> std::pair<Range, size_t> {
-  if (!cmd.empty() && cmd[0] == '%') {
+  if (!cmd.empty() && cmd.front() == '%') {
     return {{.line1 = 1,
              .line2 = static_cast<int>(buffer.getLines().size()),
              .addr_count = 2,
@@ -59,7 +59,7 @@ auto parseRange(std::string_view cmd, const Cursor &cursor,
   }
   size_t pos = len1;
 
-  if (pos >= cmd.size() || cmd[pos] != ',') {
+  if (pos >= cmd.size() || cmd.at(pos) != ',') {
     return {{.line1 = addr1, .line2 = addr1, .addr_count = 1, .valid = true},
             pos};
   }
@@ -99,11 +99,11 @@ auto searchForCmd(std::string_view cmd, const Cursor &cursor,
 
   for (; iter != entry_array.end() && iter->name.starts_with(name); ++iter) {
     if (name.size() >= iter->namelen) {
-      return {.entry = &(*iter), .consumed = pos + NAME_LEN, .range = range};
+      return {.range = range, .entry = &(*iter), .consumed = pos + NAME_LEN};
     }
   }
 
-  return {.entry = nullptr, .consumed = 0, .range = range};
+  return {.range = range, .entry = nullptr, .consumed = 0};
 }
 
 auto constructCmdStruct(std::string_view cmd, CmdMatch match) -> Command {
@@ -121,7 +121,7 @@ auto constructCmdStruct(std::string_view cmd, CmdMatch match) -> Command {
 
   size_t pos = match.consumed;
 
-  if (pos < cmd.size() && cmd[pos] == '!') {
+  if (pos < cmd.size() && cmd.at(pos) == '!') {
     if ((FLAGS & FlagCmd::Bang) == 0) {
       throw std::invalid_argument("command does not accept '!'");
     }
@@ -130,19 +130,19 @@ auto constructCmdStruct(std::string_view cmd, CmdMatch match) -> Command {
   }
 
   if ((FLAGS & FlagCmd::Extra) != 0 && pos < cmd.size() &&
-      std::isspace(static_cast<unsigned char>(cmd[pos])) == 0) {
-    cmd_struct.extra = cmd[pos];
+      std::isspace(static_cast<unsigned char>(cmd.at(pos))) == 0) {
+    cmd_struct.extra = cmd.at(pos);
     ++pos;
   }
 
   while (pos < cmd.size() &&
-         std::isspace(static_cast<unsigned char>(cmd[pos])) != 0) {
+         std::isspace(static_cast<unsigned char>(cmd.at(pos))) != 0) {
     ++pos;
   }
 
   size_t count_start = pos;
   while (pos < cmd.size() &&
-         std::isdigit(static_cast<unsigned char>(cmd[pos])) != 0) {
+         std::isdigit(static_cast<unsigned char>(cmd.at(pos))) != 0) {
     ++pos;
   }
   if (pos > count_start) {
@@ -151,7 +151,7 @@ auto constructCmdStruct(std::string_view cmd, CmdMatch match) -> Command {
     cmd_struct.count = count;
 
     while (pos < cmd.size() &&
-           std::isspace(static_cast<unsigned char>(cmd[pos])) != 0) {
+           std::isspace(static_cast<unsigned char>(cmd.at(pos))) != 0) {
       ++pos;
     }
   }

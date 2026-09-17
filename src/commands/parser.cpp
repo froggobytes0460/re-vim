@@ -8,6 +8,7 @@ constexpr char KEY_TERM_BACKSPACE{8};
 constexpr int HIGHEST_ASCII_SUPPORTED{126};
 constexpr int LOWEST_ASCII_SUPPORTED{32};
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 [[nodiscard]] auto readCommandLine() noexcept -> std::string {
   WINDOW *status_win = global_vars::status_win;
 
@@ -20,17 +21,12 @@ constexpr int LOWEST_ASCII_SUPPORTED{32};
   std::string cmd{};
 
   int ch{};
-  while ((ch = wgetch(status_win)) != '\n' && ch != '\r') {
-    if (ch == ERR) {
-      continue;
-    }
-
-    if (ch == KEY_ESC) {
-      cmd.clear();
-      break;
-    }
-
-    if (ch == KEY_BACKSPACE || ch == KEY_TERM_BACKSPACE) {
+  bool loop_run{true};
+  while ((ch = wgetch(status_win)) != '\n' && ch != '\r' && loop_run) {
+    switch (ch) {
+    case KEY_BACKSPACE:
+      [[fallthrough]];
+    case KEY_TERM_BACKSPACE: {
       if (!cmd.empty()) {
         cmd.pop_back();
         int y{};
@@ -42,7 +38,16 @@ constexpr int LOWEST_ASCII_SUPPORTED{32};
         wdelch(status_win);
         wrefresh(status_win);
       }
-      continue;
+      break;
+    }
+    case KEY_ESC:
+      cmd.clear();
+      loop_run = false;
+      [[fallthrough]];
+    case ERR:
+      [[fallthrough]];
+    default:
+      break;
     }
 
     if (ch < LOWEST_ASCII_SUPPORTED || ch > HIGHEST_ASCII_SUPPORTED) {

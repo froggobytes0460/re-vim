@@ -36,9 +36,9 @@ void printError(const std::string_view &err) noexcept {
   wattron(global_vars::status_win, COLOR_PAIR(Terminal::ERROR_PAIR));
 
   constexpr std::string_view PREFIX{"E: "};
-  int const MAX_LEN = std::max(0, getmaxx(global_vars::status_win) -
+  const int MAX_LEN = std::max(0, getmaxx(global_vars::status_win) -
                                       static_cast<int>(PREFIX.size()) - 1);
-  int const LEN = std::min(static_cast<int>(err.size()), MAX_LEN);
+  const int LEN = std::min(static_cast<int>(err.size()), MAX_LEN);
 
   // NOLINTBEGIN(bugprone-suspicious-stringview-data-usage): LEN <=
   // err.size(), bounded read is safe.

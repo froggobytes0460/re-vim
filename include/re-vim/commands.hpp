@@ -39,14 +39,17 @@ using CmdHandler = std::function<void(Command &)>;
 /// @brief Static definition of a known ex command.
 struct CmdEntry {
   std::string name;     ///< Full command name (e.g. "write").
-  size_t namelen{};     ///< Minimum unambiguous prefix length for @ref name.
   CmdHandler handler;   ///< Function that executes the command.
+  size_t namelen{};     ///< Minimum unambiguous prefix length for @ref name.
   uint32_t flags{};     ///< Bitmask of @ref FlagCmd values.
   AddrType addr_type{}; ///< Kind of range this command accepts.
 };
 
 /// @brief Parsed instance of a command line, ready for execution.
 struct Command {
+  // Argument
+  std::string arg; ///< Remaining argument text after the command name.
+
   // Range
   int line1{0};      ///< First line of the range.
   int line2{0};      ///< Last line of the range.
@@ -56,9 +59,6 @@ struct Command {
   // Modifiers
   bool forceit{false}; ///< Whether the `!` modifier was present.
   char extra{0};       ///< Extra modifier character, if any.
-
-  // Argument
-  std::string arg; ///< Remaining argument text after the command name.
 };
 
 /// @brief Parsed line range (e.g. `1,5`) before resolution against a buffer.
@@ -72,10 +72,10 @@ struct Range {
 /// @brief Result of matching input text against known @ref CmdEntry
 /// definitions.
 struct CmdMatch {
+  Range range; ///< Range parsed before the command name, if any.
   const CmdEntry *entry =
       nullptr;       ///< Matched command definition, or nullptr if none.
   size_t consumed{}; ///< Chars of input eaten by the range and name.
-  Range range;       ///< Range parsed before the command name, if any.
 };
 
 /// @brief Get pre-computed array of commands.
